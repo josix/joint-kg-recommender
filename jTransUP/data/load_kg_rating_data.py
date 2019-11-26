@@ -8,9 +8,10 @@ def loadR2KgMap(filename):
     with open(filename, 'r', encoding='utf-8') as fin:
         for line in fin:
             line_split = line.strip().split('\t')
-            if len(line_split) != 3 : continue
+            if len(line_split) != 3 :continue
             i_id = line_split[0]
             kg_uri = line_split[2]
+            if i_id in i2kg_map or kg_uri in kg2i_map:continue
             i2kg_map[i_id] = kg_uri
             kg2i_map[kg_uri] = i_id
     print("successful load {} item and {} entity pairs!".format(len(i2kg_map), len(kg2i_map)))

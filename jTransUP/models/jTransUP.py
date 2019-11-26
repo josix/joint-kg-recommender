@@ -123,8 +123,7 @@ class jTransUPModel(nn.Module):
         
         if is_rec and ratings is not None:
             u_ids, i_ids = ratings
-
-            e_ids = self.paddingItems(i_ids.data, self.ent_total-1)
+            e_ids = self.paddingItems(i_ids.tolist(), self.ent_total-1)
             e_var = to_gpu(V(torch.LongTensor(e_ids)))
 
             u_e = self.user_embeddings(u_ids)

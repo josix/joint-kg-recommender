@@ -74,11 +74,11 @@ def evaluateRec(FLAGS, model, eval_iter, eval_dict, all_dicts, i_map, logger, ev
         pbar.update(1)
     pbar.close()
 
-    performances = [result[:5] for result in results]
+    performances = [result[:6] for result in results]
 
-    f1, p, r, hit, ndcg = np.array(performances).mean(axis=0)
+    f1, p, r, hit, ndcg, map_ = np.array(performances).mean(axis=0)
 
-    logger.info("f1:{:.4f}, p:{:.4f}, r:{:.4f}, hit:{:.4f}, ndcg:{:.4f}, topn:{}.".format(f1, p, r, hit, ndcg, FLAGS.topn))
+    logger.info("f1:{:.4f}, p:{:.4f}, r:{:.4f}, hit:{:.4f}, ndcg:{:.4f}, map:{:.4f}, topn:{}.".format(f1, p, r, hit, ndcg, map_, FLAGS.topn))
 
     if is_report:
         predict_tuples = [result[-1] for result in results]
@@ -101,7 +101,7 @@ def evaluateRec(FLAGS, model, eval_iter, eval_dict, all_dicts, i_map, logger, ev
                 gold_strs = ",".join([str(i) for i in gold_ids])
             logger.info("user:{}\tgold:{}\ttop:{}".format(u_id, gold_strs, ",".join([str(i) for i in top_ids])))
     model.enable_grad()
-    return f1, p, r, hit, ndcg
+    return f1, p, r, hit, ndcg, map_
 
 def evaluateKG(FLAGS, model, eval_head_iter, eval_tail_iter, eval_head_dict, eval_tail_dict, all_head_dicts, all_tail_dicts, e_map, logger, eval_descending=True, is_report=False):
     # Evaluate
@@ -402,9 +402,9 @@ def train_loop(FLAGS, model, trainer, rating_train_dataset, triple_train_dataset
         # Gradient descent step.
         trainer.optimizer_step()
         if trainer.step % 10 < step_to_switch :
-            rec_total_loss += losses.data[0]
+            rec_total_loss += losses.item()
         else:
-            kg_total_loss += losses.data[0]
+            kg_total_loss += losses.item()
         pbar.update(1)
     
 

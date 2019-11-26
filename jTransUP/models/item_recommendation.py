@@ -47,10 +47,10 @@ def evaluate(FLAGS, model, eval_iter, eval_dict, all_dicts, logger, eval_descend
         pbar.update(1)
     pbar.close()
 
-    performances = [result[:5] for result in results]
-    f1, p, r, hit, ndcg = np.array(performances).mean(axis=0)
+    performances = [result[:6] for result in results]
+    f1, p, r, hit, ndcg, map_ = np.array(performances).mean(axis=0)
 
-    logger.info("f1:{:.4f}, p:{:.4f}, r:{:.4f}, hit:{:.4f}, ndcg:{:.4f}, topn:{}.".format(f1, p, r, hit, ndcg, FLAGS.topn))
+    logger.info("f1:{:.4f}, p:{:.4f}, r:{:.4f}, hit:{:.4f}, ndcg:{:.4f}, map:{:.4f}, topn:{}.".format(f1, p, r, hit, ndcg, map_, 10))
 
     if is_report:
         predict_tuples = [result[-1] for result in results]
@@ -72,7 +72,7 @@ def evaluate(FLAGS, model, eval_iter, eval_dict, all_dicts, logger, eval_descend
                 gold_strs = ",".join([str(i) for i in gold_ids])
             logger.info("user:{}\tgold:{}\ttop:{}".format(u_id, gold_strs, ",".join([str(i) for i in top_ids])))
     model.enable_grad()
-    return f1, p, r, hit, ndcg
+    return f1, p, r, hit, ndcg, map_
 
 def train_loop(FLAGS, model, trainer, train_dataset, eval_datasets,
             user_total, item_total, logger, vis=None, is_report=False):
@@ -190,7 +190,7 @@ def train_loop(FLAGS, model, trainer, train_dataset, eval_datasets,
 
         # Gradient descent step.
         trainer.optimizer_step()
-        total_loss += losses.data[0]
+        total_loss += losses.item()
         pbar.update(1)
 
 def run(only_forward=False):

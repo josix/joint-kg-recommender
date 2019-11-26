@@ -31,7 +31,7 @@ def get_flags():
     gflags.DEFINE_bool("share_embeddings", False, "")
     gflags.DEFINE_bool("use_st_gumbel", False, "")
     gflags.DEFINE_integer("max_queue", 10, ".")
-    gflags.DEFINE_integer("num_processes", 4, ".")
+    gflags.DEFINE_integer("num_processes", 20, ".")
 
     gflags.DEFINE_float("learning_rate", 0.001, "Used in optimizer.")
     gflags.DEFINE_float("norm_lambda", 1.0, "decay of joint model.")
