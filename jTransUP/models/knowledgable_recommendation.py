@@ -219,93 +219,93 @@ def train_loop(FLAGS, model, trainer, rating_train_dataset, triple_train_dataset
     model.enable_grad()
     for _ in range(trainer.step, FLAGS.training_steps):
 
-        if FLAGS.early_stopping_steps_to_wait > 0 and (trainer.step - trainer.best_step) > FLAGS.early_stopping_steps_to_wait:
-            logger.info('No improvement after ' +
-                       str(FLAGS.early_stopping_steps_to_wait) +
-                       ' steps. Stopping training.')
-            if pbar is not None: pbar.close()
-            break
-        if trainer.step % FLAGS.eval_interval_steps == 0 and (len(rating_eval_datasets) > 0 or len(triple_eval_datasets)>0):
+        # if FLAGS.early_stopping_steps_to_wait > 0 and (trainer.step - trainer.best_step) > FLAGS.early_stopping_steps_to_wait:
+        #     logger.info('No improvement after ' +
+        #                str(FLAGS.early_stopping_steps_to_wait) +
+        #                ' steps. Stopping training.')
+        #     if pbar is not None: pbar.close()
+        #     break
+        if trainer.step % FLAGS.eval_interval_steps == 0:
             if pbar is not None:
                 pbar.close()
             rec_total_loss /= (FLAGS.eval_interval_steps * FLAGS.joint_ratio)
             kg_total_loss /= (FLAGS.eval_interval_steps * (1-FLAGS.joint_ratio))
             logger.info("rec train loss:{:.4f}, kg train loss:{:.4f}!".format(rec_total_loss, kg_total_loss))
 
-            rec_performances = []
-            for i, eval_data in enumerate(rating_eval_datasets):
-                all_eval_dicts = None
-                if FLAGS.filter_wrong_corrupted:
-                    all_eval_dicts = [rating_train_dict] + [tmp_data[3] for j, tmp_data in enumerate(rating_eval_datasets) if j!=i]
+            # rec_performances = []
+            # for i, eval_data in enumerate(rating_eval_datasets):
+            #     all_eval_dicts = None
+            #     if FLAGS.filter_wrong_corrupted:
+            #         all_eval_dicts = [rating_train_dict] + [tmp_data[3] for j, tmp_data in enumerate(rating_eval_datasets) if j!=i]
 
-                rec_performances.append( evaluateRec(FLAGS, model, eval_data[0], eval_data[3], all_eval_dicts, i_map, logger, eval_descending=True if trainer.model_target == 1 else False, is_report=is_report))
+            #     rec_performances.append( evaluateRec(FLAGS, model, eval_data[0], eval_data[3], all_eval_dicts, i_map, logger, eval_descending=True if trainer.model_target == 1 else False, is_report=is_report))
 
-            kg_performances = []
-            for i, eval_data in enumerate(triple_eval_datasets):
-                eval_head_dicts = None
-                eval_tail_dicts = None
-                if FLAGS.filter_wrong_corrupted:
-                    eval_head_dicts = [head_train_dict] + [tmp_data[4] for j, tmp_data in enumerate(triple_eval_datasets) if j!=i]
-                    eval_tail_dicts = [tail_train_dict] + [tmp_data[5] for j, tmp_data in enumerate(triple_eval_datasets) if j!=i]
+            # kg_performances = []
+            # for i, eval_data in enumerate(triple_eval_datasets):
+            #     eval_head_dicts = None
+            #     eval_tail_dicts = None
+            #     if FLAGS.filter_wrong_corrupted:
+            #         eval_head_dicts = [head_train_dict] + [tmp_data[4] for j, tmp_data in enumerate(triple_eval_datasets) if j!=i]
+            #         eval_tail_dicts = [tail_train_dict] + [tmp_data[5] for j, tmp_data in enumerate(triple_eval_datasets) if j!=i]
 
-                kg_performances.append( evaluateKG(FLAGS, model, eval_data[0], eval_data[1], eval_data[4], eval_data[5], eval_head_dicts, eval_tail_dicts, e_map, logger, eval_descending=False, is_report=is_report))
+            #     kg_performances.append( evaluateKG(FLAGS, model, eval_data[0], eval_data[1], eval_data[4], eval_data[5], eval_head_dicts, eval_tail_dicts, e_map, logger, eval_descending=False, is_report=is_report))
 
-            vis_rec = True if len(rec_performances) > 0 else False
-            vis_kg = True if len(kg_performances) > 0 else False
-            if trainer.step > 0 and vis_rec > 0:
-                is_best = trainer.new_performance(rec_performances[0], rec_performances)
-                # visuliazation
-                if vis is not None:
-                    if vis_rec and vis_kg:
-                        vis.plot_many_stack({'Rec Train Loss': rec_total_loss, 'KG Train Loss':kg_total_loss}, win_name="Loss Curve")
-                    else:
-                        vis.plot_many_stack({'Rec Train Loss': rec_total_loss}, win_name="Loss Curve")
+            # vis_rec = False
+            # vis_kg = False
+            # if trainer.step > 0 and vis_rec > 0:
+            #     # is_best = trainer.new_performance(rec_performances[0], rec_performances)
+            #     # visuliazation
+            #     if vis is not None:
+            #         if vis_rec and vis_kg:
+            #             vis.plot_many_stack({'Rec Train Loss': rec_total_loss, 'KG Train Loss':kg_total_loss}, win_name="Loss Curve")
+            #         else:
+            #             vis.plot_many_stack({'Rec Train Loss': rec_total_loss}, win_name="Loss Curve")
 
-                    f1_dict = {}
-                    p_dict = {}
-                    r_dict = {}
-                    rec_hit_dict = {}
-                    ndcg_dict = {}
-                    for i, performance in enumerate(rec_performances):
-                        f1_dict['Rec Eval {} F1'.format(i)] = performance[0]
-                        p_dict['Rec Eval {} Precision'.format(i)] = performance[1]
-                        r_dict['Rec Eval {} Recall'.format(i)] = performance[2]
-                        rec_hit_dict['Rec Eval {} Hit'.format(i)] = performance[3]
-                        ndcg_dict['Rec Eval {} NDCG'.format(i)] = performance[4]
+            #         f1_dict = {}
+            #         p_dict = {}
+            #         r_dict = {}
+            #         rec_hit_dict = {}
+            #         ndcg_dict = {}
+            #         for i, performance in enumerate(rec_performances):
+            #             f1_dict['Rec Eval {} F1'.format(i)] = performance[0]
+            #             p_dict['Rec Eval {} Precision'.format(i)] = performance[1]
+            #             r_dict['Rec Eval {} Recall'.format(i)] = performance[2]
+            #             rec_hit_dict['Rec Eval {} Hit'.format(i)] = performance[3]
+            #             ndcg_dict['Rec Eval {} NDCG'.format(i)] = performance[4]
                     
-                    kg_hit_dict = {}
-                    meanrank_dict = {}
-                    for i, performance in enumerate(kg_performances):
-                        kg_hit_dict['KG Eval {} Hit'.format(i)] = performance[0]
-                        meanrank_dict['KG Eval {} MeanRank'.format(i)] = performance[1]
+            #         kg_hit_dict = {}
+            #         meanrank_dict = {}
+            #         for i, performance in enumerate(kg_performances):
+            #             kg_hit_dict['KG Eval {} Hit'.format(i)] = performance[0]
+            #             meanrank_dict['KG Eval {} MeanRank'.format(i)] = performance[1]
 
-                    if is_best:
-                        log_str = ["Best performances in {} step!".format(trainer.best_step)]
-                        log_str += ["{} : {}.".format(s, "%.5f" % f1_dict[s]) for s in f1_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % p_dict[s]) for s in p_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % r_dict[s]) for s in r_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % rec_hit_dict[s]) for s in rec_hit_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % ndcg_dict[s]) for s in ndcg_dict]
+            #         if is_best:
+            #             log_str = ["Best performances in {} step!".format(trainer.best_step)]
+            #             log_str += ["{} : {}.".format(s, "%.5f" % f1_dict[s]) for s in f1_dict]
+            #             log_str += ["{} : {}.".format(s, "%.5f" % p_dict[s]) for s in p_dict]
+            #             log_str += ["{} : {}.".format(s, "%.5f" % r_dict[s]) for s in r_dict]
+            #             log_str += ["{} : {}.".format(s, "%.5f" % rec_hit_dict[s]) for s in rec_hit_dict]
+            #             log_str += ["{} : {}.".format(s, "%.5f" % ndcg_dict[s]) for s in ndcg_dict]
 
-                        if vis_kg:
-                            log_str += ["{} : {}.".format(s, "%.5f" % kg_hit_dict[s]) for s in kg_hit_dict]
-                            log_str += ["{} : {}.".format(s, "%.5f" % meanrank_dict[s]) for s in meanrank_dict]
+            #             if vis_kg:
+            #                 log_str += ["{} : {}.".format(s, "%.5f" % kg_hit_dict[s]) for s in kg_hit_dict]
+            #                 log_str += ["{} : {}.".format(s, "%.5f" % meanrank_dict[s]) for s in meanrank_dict]
                         
-                        vis.log("\n".join(log_str), win_name="Best Performances")
+            #             vis.log("\n".join(log_str), win_name="Best Performances")
 
-                    vis.plot_many_stack(f1_dict, win_name="Rec F1 Score@{}".format(FLAGS.topn))
+            #         vis.plot_many_stack(f1_dict, win_name="Rec F1 Score@{}".format(FLAGS.topn))
                     
-                    vis.plot_many_stack(p_dict, win_name="Rec Precision@{}".format(FLAGS.topn))
+            #         vis.plot_many_stack(p_dict, win_name="Rec Precision@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(r_dict, win_name="Rec Recall@{}".format(FLAGS.topn))
+            #         vis.plot_many_stack(r_dict, win_name="Rec Recall@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(rec_hit_dict, win_name="Rec Hit Ratio@{}".format(FLAGS.topn))
+            #         vis.plot_many_stack(rec_hit_dict, win_name="Rec Hit Ratio@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(ndcg_dict, win_name="Rec NDCG@{}".format(FLAGS.topn))
-                    if vis_kg:
-                        vis.plot_many_stack(kg_hit_dict, win_name="KG Hit Ratio@{}".format(FLAGS.topn))
+            #         vis.plot_many_stack(ndcg_dict, win_name="Rec NDCG@{}".format(FLAGS.topn))
+            #         if vis_kg:
+            #             vis.plot_many_stack(kg_hit_dict, win_name="KG Hit Ratio@{}".format(FLAGS.topn))
 
-                        vis.plot_many_stack(meanrank_dict, win_name="KG MeanRank")
+            #             vis.plot_many_stack(meanrank_dict, win_name="KG MeanRank")
 
             # set model in training mode
             pbar = tqdm(total=FLAGS.eval_interval_steps)
@@ -448,7 +448,6 @@ def run(only_forward=False):
         kg_eval_files = FLAGS.kg_test_files.split(':')
 
     rating_train_dataset, rating_eval_datasets, u_map, i_map, triple_train_dataset, triple_eval_datasets, e_map, r_map, ikg_map = load_data(dataset_path, rec_eval_files, kg_eval_files, FLAGS.batch_size, negtive_samples=FLAGS.negtive_samples, logger=logger)
-
     rating_train_iter, rating_train_total, rating_train_list, rating_train_dict = rating_train_dataset
 
     triple_train_iter, triple_train_total, triple_train_list, triple_train_head_dict, triple_train_tail_dict = triple_train_dataset
@@ -536,6 +535,17 @@ def run(only_forward=False):
             is_report=False)
     if vis is not None:
         vis.log("Finish!", win_name="Best Performances")
+    torch.save(joint_model.state_dict(),
+        './embedding/jtransup-{data:s}-{embed_dim:d}-{lr:f}-{batch_size:d}-{negtive_samples:d}-{lrdecay:f}-no_early_stop_steps-{steps:d}.emb'.format(
+        negtive_samples=FLAGS.negtive_samples,
+        batch_size=FLAGS.batch_size,
+        data=FLAGS.dataset,
+        embed_dim=FLAGS.embedding_size,
+        lr=FLAGS.learning_rate,
+        lrdecay=FLAGS.learning_rate_decay_when_no_progress,
+        # early_stop_steps=FLAGS.early_stopping_steps_to_wait,
+        steps=FLAGS.training_steps,
+        ))
 
 if __name__ == '__main__':
     get_flags()

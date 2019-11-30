@@ -23,7 +23,7 @@ def get_flags():
     gflags.DEFINE_enum("model_type", "transup", ["transup", "bprmf", "fm",
                                                 "transe", "transh", "transr", "transd",
                                                 "cfkg", "cke", "cofm", "jtransup"], "")
-    gflags.DEFINE_enum("dataset", "ml1m", ["ml1m", "dbbook2014", "amazon-book", "last-fm", "yelp2018"], "including ratings.csv, r2kg.tsv and a kg dictionary containing kg_hop[0-9].dat")
+    gflags.DEFINE_enum("dataset", "ml1m", ['kktix', "ml1m", "dbbook2014", "amazon-book", "last-fm", "yelp2018"], "including ratings.csv, r2kg.tsv and a kg dictionary containing kg_hop[0-9].dat")
     gflags.DEFINE_bool(
         "filter_wrong_corrupted",
         True,
@@ -31,7 +31,7 @@ def get_flags():
     gflags.DEFINE_bool("share_embeddings", False, "")
     gflags.DEFINE_bool("use_st_gumbel", False, "")
     gflags.DEFINE_integer("max_queue", 10, ".")
-    gflags.DEFINE_integer("num_processes", 20, ".")
+    gflags.DEFINE_integer("num_processes", 40, ".")
 
     gflags.DEFINE_float("learning_rate", 0.001, "Used in optimizer.")
     gflags.DEFINE_float("norm_lambda", 1.0, "decay of joint model.")

@@ -92,64 +92,64 @@ def train_loop(FLAGS, model, trainer, train_dataset, eval_datasets,
     model.enable_grad()
     for _ in range(trainer.step, FLAGS.training_steps):
 
-        if FLAGS.early_stopping_steps_to_wait > 0 and (trainer.step - trainer.best_step) > FLAGS.early_stopping_steps_to_wait:
-            logger.info('No improvement after ' +
-                       str(FLAGS.early_stopping_steps_to_wait) +
-                       ' steps. Stopping training.')
-            if pbar is not None: pbar.close()
-            break
+        # if FLAGS.early_stopping_steps_to_wait > 0 and (trainer.step - trainer.best_step) > FLAGS.early_stopping_steps_to_wait:
+        #     logger.info('No improvement after ' +
+        #                str(FLAGS.early_stopping_steps_to_wait) +
+        #                ' steps. Stopping training.')
+        #     if pbar is not None: pbar.close()
+        #     break
         if trainer.step % FLAGS.eval_interval_steps == 0 :
             if pbar is not None:
                 pbar.close()
             total_loss /= FLAGS.eval_interval_steps
             logger.info("train loss:{:.4f}!".format(total_loss))
 
-            performances = []
-            for i, eval_data in enumerate(eval_datasets):
-                all_eval_dicts = None
-                if FLAGS.filter_wrong_corrupted:
-                    all_eval_dicts = [train_dict] + [tmp_data[3] for j, tmp_data in enumerate(eval_datasets) if j!=i]
+            # performances = []
+            # for i, eval_data in enumerate(eval_datasets):
+            #     all_eval_dicts = None
+            #     if FLAGS.filter_wrong_corrupted:
+            #         all_eval_dicts = [train_dict] + [tmp_data[3] for j, tmp_data in enumerate(eval_datasets) if j!=i]
                     
-                performances.append( evaluate(FLAGS, model, eval_data[0], eval_data[3], all_eval_dicts, logger, eval_descending=True if trainer.model_target == 1 else False, is_report=is_report))
+            #     performances.append( evaluate(FLAGS, model, eval_data[0], eval_data[3], all_eval_dicts, logger, eval_descending=True if trainer.model_target == 1 else False, is_report=is_report))
             
-            if trainer.step > 0 and len(performances) > 0:
-                is_best = trainer.new_performance(performances[0], performances)
+            # if trainer.step > 0 and len(performances) > 0:
+            #     is_best = trainer.new_performance(performances[0], performances)
                 
-                # visuliazation
-                if vis is not None:
-                    vis.plot_many_stack({'Rec Train Loss': total_loss},
-                    win_name="Loss Curve")
-                    f1_vis_dict = {}
-                    p_vis_dict = {}
-                    r_vis_dict = {}
-                    hit_vis_dict = {}
-                    ndcg_vis_dict = {}
-                    for i, performance in enumerate(performances):
-                        f1_vis_dict['Rec Eval {} F1'.format(i)] = performance[0]
-                        p_vis_dict['Rec Eval {} Precision'.format(i)] = performance[1]
-                        r_vis_dict['Rec Eval {} Recall'.format(i)] = performance[2]
-                        hit_vis_dict['Rec Eval {} Hit'.format(i)] = performance[3]
-                        ndcg_vis_dict['Rec Eval {} NDCG'.format(i)] = performance[4]
+                # # visuliazation
+                # if vis is not None:
+                #     vis.plot_many_stack({'Rec Train Loss': total_loss},
+                #     win_name="Loss Curve")
+                #     f1_vis_dict = {}
+                #     p_vis_dict = {}
+                #     r_vis_dict = {}
+                #     hit_vis_dict = {}
+                #     ndcg_vis_dict = {}
+                #     for i, performance in enumerate(performances):
+                #         f1_vis_dict['Rec Eval {} F1'.format(i)] = performance[0]
+                #         p_vis_dict['Rec Eval {} Precision'.format(i)] = performance[1]
+                #         r_vis_dict['Rec Eval {} Recall'.format(i)] = performance[2]
+                #         hit_vis_dict['Rec Eval {} Hit'.format(i)] = performance[3]
+                #         ndcg_vis_dict['Rec Eval {} NDCG'.format(i)] = performance[4]
                     
-                    if is_best:
-                        log_str = ["Best performances in {} step!".format(trainer.best_step)]
-                        log_str += ["{} : {}.".format(s, "%.5f" % f1_vis_dict[s]) for s in f1_vis_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % p_vis_dict[s]) for s in p_vis_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % r_vis_dict[s]) for s in r_vis_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % hit_vis_dict[s]) for s in hit_vis_dict]
-                        log_str += ["{} : {}.".format(s, "%.5f" % ndcg_vis_dict[s]) for s in ndcg_vis_dict]
+                #     if is_best:
+                #         log_str = ["Best performances in {} step!".format(trainer.best_step)]
+                #         log_str += ["{} : {}.".format(s, "%.5f" % f1_vis_dict[s]) for s in f1_vis_dict]
+                #         log_str += ["{} : {}.".format(s, "%.5f" % p_vis_dict[s]) for s in p_vis_dict]
+                #         log_str += ["{} : {}.".format(s, "%.5f" % r_vis_dict[s]) for s in r_vis_dict]
+                #         log_str += ["{} : {}.".format(s, "%.5f" % hit_vis_dict[s]) for s in hit_vis_dict]
+                #         log_str += ["{} : {}.".format(s, "%.5f" % ndcg_vis_dict[s]) for s in ndcg_vis_dict]
                         
-                        vis.log("\n".join(log_str), win_name="Best Performances")
+                #         vis.log("\n".join(log_str), win_name="Best Performances")
 
-                    vis.plot_many_stack(f1_vis_dict, win_name="Rec F1 Score@{}".format(FLAGS.topn))
+                #     vis.plot_many_stack(f1_vis_dict, win_name="Rec F1 Score@{}".format(FLAGS.topn))
                     
-                    vis.plot_many_stack(p_vis_dict, win_name="Rec Precision@{}".format(FLAGS.topn))
+                #     vis.plot_many_stack(p_vis_dict, win_name="Rec Precision@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(r_vis_dict, win_name="Rec Recall@{}".format(FLAGS.topn))
+                #     vis.plot_many_stack(r_vis_dict, win_name="Rec Recall@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(hit_vis_dict, win_name="Rec Hit Ratio@{}".format(FLAGS.topn))
+                #     vis.plot_many_stack(hit_vis_dict, win_name="Rec Hit Ratio@{}".format(FLAGS.topn))
 
-                    vis.plot_many_stack(ndcg_vis_dict, win_name="Rec NDCG@{}".format(FLAGS.topn))
+                #     vis.plot_many_stack(ndcg_vis_dict, win_name="Rec NDCG@{}".format(FLAGS.topn))
 
             # set model in training mode
             pbar = tqdm(total=FLAGS.eval_interval_steps)
@@ -225,7 +225,7 @@ def run(only_forward=False):
 
     # load data
     dataset_path = os.path.join(FLAGS.data_path, FLAGS.dataset)
-    eval_files = FLAGS.rec_test_files.split(':')
+    eval_files = FLAGS.rec_test_files.split(':') if FLAGS.rec_test_files else []
 
     train_dataset, eval_datasets, u_map, i_map = load_data(dataset_path, eval_files, FLAGS.batch_size, logger=logger, negtive_samples=FLAGS.negtive_samples)
 
@@ -271,6 +271,17 @@ def run(only_forward=False):
             is_report=False)
     if vis is not None:
         vis.log("Finish!", win_name="Best Performances")
+    torch.save(model.state_dict(),
+        './embedding/transup-{data:s}-{embed_dim:d}-{lr:f}-{batch_size:d}-{negtive_samples:d}-{lrdecay:f}-no_early_stop_steps-{steps:d}.emb'.format(
+        negtive_samples=FLAGS.negtive_samples,
+        batch_size=FLAGS.batch_size,
+        data=FLAGS.dataset,
+        embed_dim=FLAGS.embedding_size,
+        lr=FLAGS.learning_rate,
+        lrdecay=FLAGS.learning_rate_decay_when_no_progress,
+        # early_stop_steps=FLAGS.early_stopping_steps_to_wait,
+        steps=FLAGS.training_steps,
+        ))
     
 if __name__ == '__main__':
     get_flags()
